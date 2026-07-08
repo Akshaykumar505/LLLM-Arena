@@ -2,7 +2,7 @@
 
 Ask one question, get answers from 3 AI models at once, and let a 4th AI "judge" model pick the best response.
 
-Live demo: [Add your Render URL here]
+Live demo: [https://lllm-arena.onrender.com]
 
 Features
 
@@ -41,7 +41,7 @@ Setup (Local Development)
 
 1. Clone the repository
 
-bashgit clone https://github.com/YOUR_USERNAME/llm-arena.git
+bashgit clone https://github.com/Akshaykumar505/llm-arena.git
 cd llm-arena
 
 2. Install dependencies
