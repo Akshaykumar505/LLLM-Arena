@@ -9,7 +9,7 @@ app.use(express.json());
 // + ek third free model (Claude ka koi free tier nahi hai kahi bhi)
 const MODELS = [
   { label: "A", provider: "openrouter", model: "openai/gpt-oss-120b:free", name: "OpenAI (gpt-oss-120b)" },
-  { label: "B", provider: "gemini", model: "gemini-flash-latest", name: "Google Gemini (latest)" },
+  { label: "B", provider: "gemini", model: "gemini-3.1-flash-lite", name: "Google Gemini Flash-Lite" },
   { label: "C", provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct:free", name: "Meta Llama 3.3 70B" },
 ];
 
@@ -86,7 +86,7 @@ RESPONSE C: ${outputs.C}
 Reply with ONLY this JSON format, nothing else:
 {"finalAnswer": "the new synthesized answer here", "reasoning": "1-2 sentences on how you combined the responses", "ratings": {"accuracy": 4, "clarity": 5, "depth": 4, "relevance": 5, "completeness": 4}}`;
 
-  const raw = await callGemini("gemini-flash-latest", evaluatorPrompt, 700);
+  const raw = await callGemini("gemini-3.1-flash-lite", evaluatorPrompt, 700);
   const cleaned = raw.replace(/```json|```/g, "").trim();
 
   try {
