@@ -14,7 +14,7 @@ const MODELS = [
 ];
 
 // ---- OpenRouter caller ----
-async function callOpenRouter(model, prompt) {
+async function callOpenRouter(model, prompt, maxTokens = 200) {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -24,6 +24,7 @@ async function callOpenRouter(model, prompt) {
     body: JSON.stringify({
       model: model,
       messages: [{ role: "user", content: prompt }],
+      max_tokens: maxTokens,
     }),
   });
   const data = await response.json();
@@ -37,7 +38,7 @@ async function callOpenRouter(model, prompt) {
 }
 
 // ---- Google Gemini caller (direct API, not via OpenRouter) ----
-async function callGemini(model, prompt) {
+async function callGemini(model, prompt, maxTokens = 200) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
   const response = await fetch(url, {
@@ -45,6 +46,7 @@ async function callGemini(model, prompt) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: maxTokens },
     }),
   });
   const data = await response.json();
@@ -59,20 +61,19 @@ async function callGemini(model, prompt) {
 }
 
 // ---- Router: calls the right provider based on model entry ----
-async function callModel(entry, prompt) {
+async function callModel(entry, prompt, maxTokens = 200) {
   if (entry.provider === "gemini") {
-    return callGemini(entry.model, prompt);
+    return callGemini(entry.model, prompt, maxTokens);
   }
-  return callOpenRouter(entry.model, prompt);
+  return callOpenRouter(entry.model, prompt, maxTokens);
 }
 
 // ---- Evaluator: analyzes all 3 responses and SYNTHESIZES a new final answer ----
-// (Does NOT just pick a winner — combines the strongest parts of each.)
 async function synthesizeFinalAnswer(prompt, outputs) {
   const evaluatorPrompt = `You are an expert evaluator. A user asked a question, and three independent AI models each gave their own answer below. Your job is NOT to simply pick one of them. Instead:
 1. Analyze all three responses.
 2. Identify the strongest, most accurate, and clearest parts of each.
-3. Write a new, refined final answer that combines the best elements — do not copy any single response verbatim.
+3. Write a new, refined final answer that combines the best elements — do not copy any single response verbatim. Keep it concise (3-5 sentences).
 
 QUESTION: ${prompt}
 
@@ -85,7 +86,7 @@ RESPONSE C: ${outputs.C}
 Reply with ONLY this JSON format, nothing else:
 {"finalAnswer": "the new synthesized answer here", "reasoning": "1-2 sentences on how you combined the responses", "ratings": {"accuracy": 4, "clarity": 5, "depth": 4, "relevance": 5, "completeness": 4}}`;
 
-  const raw = await callGemini("gemini-flash-latest", evaluatorPrompt);
+  const raw = await callGemini("gemini-flash-latest", evaluatorPrompt, 700);
   const cleaned = raw.replace(/```json|```/g, "").trim();
 
   try {
@@ -108,8 +109,10 @@ Reply with ONLY this JSON format, nothing else:
 app.post("/api/test", async (req, res) => {
   const userPrompt = req.body.prompt;
 
+  const concisePrompt = `${userPrompt}\n\n(Please answer concisely and directly, in 3-5 sentences maximum.)`;
+
   const settled = await Promise.allSettled(
-    MODELS.map((m) => callModel(m, userPrompt))
+    MODELS.map((m) => callModel(m, concisePrompt))
   );
 
   const outputsObj = {};
