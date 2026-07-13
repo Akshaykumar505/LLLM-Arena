@@ -16,17 +16,10 @@
     body.no-scroll { overflow: hidden; }
 
     .topbar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 64px;
-      background: #0F1015;
-      border-bottom: 1px solid #2C2E37;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      z-index: 120;
-      transition: margin-left 0.3s ease-in-out;
+      position: fixed; top: 0; left: 0; right: 0; height: 64px;
+      background: #0F1015; border-bottom: 1px solid #2C2E37;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; z-index: 120; transition: margin-left 0.3s ease-in-out;
     }
     .topbar-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
     .menu-toggle {
@@ -57,12 +50,9 @@
       position: fixed; top: 0; left: 0; height: 100vh;
       width: 260px; max-width: 80vw;
       background: linear-gradient(180deg, #6D28D9, #DB2777, #EA580C);
-      padding: 24px 16px;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease-in-out;
-      will-change: transform;
-      z-index: 200;
-      overflow-y: auto;
+      padding: 24px 16px; transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out; will-change: transform;
+      z-index: 200; overflow-y: auto;
     }
     .sidebar.open { transform: translateX(0); }
     .sidebar-close {
@@ -73,8 +63,7 @@
 
     .overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.55);
-      opacity: 0; visibility: hidden;
+      background: rgba(0,0,0,0.55); opacity: 0; visibility: hidden;
       transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
       z-index: 90;
     }
@@ -87,16 +76,10 @@
     .main { flex: 1; padding: 30px 40px; min-width: 0; }
     .stats-panel { width: 260px; padding: 30px 20px; flex-shrink: 0; }
 
-    /* PUSH MODE on wider screens: content shifts + shrinks instead of being covered */
     @media (min-width: 700px) {
       body.menu-open .topbar,
-      body.menu-open .content-wrapper {
-        margin-left: 260px;
-      }
-      .overlay {
-        background: transparent;
-        pointer-events: none;
-      }
+      body.menu-open .content-wrapper { margin-left: 260px; }
+      .overlay { background: transparent; pointer-events: none; }
     }
 
     .ask-section {
@@ -123,13 +106,18 @@
       font-weight: 600; cursor: pointer; white-space: nowrap;
     }
     .ask-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .section-label {
+      font-size: 0.85rem; font-weight: 600; color: #9A9CA6;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;
+    }
+
     .results-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;
     }
     .result-card {
       background: #14151A; border: 1px solid #2C2E37; border-radius: 14px; padding: 18px; min-width: 0;
     }
-    .result-card.winner { border-color: #F59E0B; }
     .card-top {
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
       flex-wrap: wrap; gap: 8px;
@@ -141,60 +129,33 @@
       display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
     }
     .model-name-block .label { font-size: 0.75rem; color: #9A9CA6; }
-    .model-name-block .name { font-weight: 600; font-size: 0.95rem; }
-    .score-badge {
-      background: rgba(245, 158, 11, 0.15); color: #F59E0B;
-      border: 1px solid rgba(245, 158, 11, 0.4); padding: 4px 10px;
-      border-radius: 8px; font-size: 0.8rem; font-weight: 600;
-    }
+    .model-name-block .name { font-weight: 600; font-size: 0.9rem; }
     .card-text { font-size: 0.9rem; line-height: 1.6; color: #D1D2D8; word-wrap: break-word; overflow-wrap: break-word; }
-    .judge-box {
-      background: #14151A; border: 1px solid #3A2E4F; border-left: 3px solid #A855F7;
-      border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; overflow: hidden;
+
+    .final-answer-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(236,72,153,0.08));
+      border: 1px solid #A855F7; border-radius: 16px;
+      padding: 24px; margin-bottom: 20px;
     }
-    .judge-top {
-      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;
-      flex-wrap: wrap; gap: 10px;
+    .final-answer-top {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
     }
-    .judge-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .judge-title .name { font-weight: 600; word-wrap: break-word; }
-    .judge-title .sub { font-size: 0.8rem; color: #9A9CA6; }
-    .winner-tag {
-      background: rgba(34, 197, 94, 0.15); color: #4ADE80;
-      border: 1px solid rgba(34, 197, 94, 0.4); padding: 5px 12px;
-      border-radius: 8px; font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+    .final-answer-top .title {
+      font-size: 1.1rem; font-weight: 700;
+      background: linear-gradient(90deg, #A855F7, #EC4899, #F97316);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .judge-reason { font-size: 0.9rem; color: #D1D2D8; line-height: 1.6; margin-bottom: 18px; word-wrap: break-word; }
+    .final-answer-text {
+      font-size: 0.95rem; line-height: 1.7; color: #E7E7EA;
+      margin-bottom: 16px; word-wrap: break-word;
+    }
+    .final-answer-reasoning {
+      font-size: 0.82rem; color: #9A9CA6; line-height: 1.5;
+      border-top: 1px solid #3A2E4F; padding-top: 14px; margin-bottom: 14px;
+    }
     .ratings-row { display: flex; gap: 24px; flex-wrap: wrap; }
     .rating-item { font-size: 0.8rem; color: #9A9CA6; }
     .rating-item .stars { color: #F59E0B; margin-top: 4px; font-size: 0.9rem; }
-
-    .best-answer-wrap {
-      background: linear-gradient(90deg, rgba(124,58,237,0.15), rgba(236,72,153,0.1));
-      border: 1px solid #3A2E4F; border-radius: 14px; padding: 16px 22px;
-    }
-    .best-answer-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 12px;
-    }
-    .best-answer-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
-    .best-answer-left .title { font-weight: 600; }
-    .best-answer-left .sub { font-size: 0.8rem; color: #9A9CA6; word-wrap: break-word; }
-    .show-btn {
-      background: linear-gradient(90deg, #7C3AED, #EC4899); border: none; color: white;
-      padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
-    }
-    .best-answer-reveal {
-      display: none;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #3A2E4F;
-      font-size: 0.9rem;
-      line-height: 1.6;
-      color: #D1D2D8;
-      word-wrap: break-word;
-    }
-    .best-answer-reveal.show { display: block; }
 
     .sidebar-title { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding-right: 36px; }
     .sidebar-title .icon-box {
@@ -229,6 +190,13 @@
       color: #9A9CA6; font-size: 0.9rem; background: #14151A;
       border: 1px solid #2C2E37; border-radius: 12px; padding: 30px; text-align: center;
     }
+    .judge-box {
+      background: #14151A; border: 1px solid #3A2E4F; border-left: 3px solid #A855F7;
+      border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; overflow: hidden;
+    }
+    .judge-title .name { font-weight: 600; }
+    .judge-title .sub { font-size: 0.8rem; color: #9A9CA6; }
+    .judge-reason { font-size: 0.9rem; color: #D1D2D8; line-height: 1.6; word-wrap: break-word; }
 
     @media (max-width: 1000px) {
       .content-wrapper { flex-direction: column; }
@@ -251,13 +219,9 @@
       .ask-section { padding: 16px; }
       .input-row { flex-direction: column; align-items: stretch; }
       .ask-btn { width: 100%; justify-content: center; }
-      .judge-box { padding: 16px; }
-      .judge-top { flex-direction: column; align-items: stretch; }
-      .winner-tag { align-self: flex-start; }
+      .final-answer-box { padding: 16px; }
       .ratings-row { gap: 14px 20px; }
       .rating-item { flex: 1 1 40%; }
-      .best-answer-bar { flex-direction: column; align-items: stretch; text-align: left; }
-      .show-btn { width: 100%; }
     }
     @media (max-width: 400px) {
       .stats-panel { grid-template-columns: 1fr; }
@@ -274,7 +238,7 @@
         <h1>LLM <span>Arena</span></h1>
       </div>
     </div>
-    <div class="arena-badge">✨ Arena Mode: Smart Judge</div>
+    <div class="arena-badge">✨ Self-Consistency Mode</div>
   </div>
 
   <div class="overlay" id="overlay"></div>
@@ -285,11 +249,10 @@
       <div class="icon-box">🏆</div>
       <h2>LLM Arena</h2>
     </div>
-    <div class="sidebar-desc">One Question. Multiple Answers. One Winner.</div>
+    <div class="sidebar-desc">One Question. Multiple Models. One Synthesized Answer.</div>
 
     <div class="nav-item active" data-page="arena">🏠 Arena</div>
     <div class="nav-item" data-page="history">🕐 History</div>
-    <div class="nav-item" data-page="leaderboard">🏆 Leaderboard</div>
     <div class="nav-item" data-page="models">📦 Models</div>
     <div class="nav-item" data-page="analytics">📈 Analytics</div>
     <div class="nav-item" data-page="settings">⚙️ Settings</div>
@@ -297,7 +260,7 @@
     <div class="sidebar-trophy-card">
       <div class="trophy-emoji">🏆</div>
       <div class="title">LLM Arena</div>
-      <div class="sub">The best answer wins.</div>
+      <div class="sub">Better answers through consensus.</div>
     </div>
   </div>
 
@@ -307,7 +270,7 @@
       <!-- ARENA PAGE -->
       <div id="page-arena" class="page active">
         <div class="ask-section">
-          <h2>Ask anything. Get the <span>best answer.</span></h2>
+          <h2>Ask anything. Get a <span>synthesized answer.</span></h2>
           <div class="input-row">
             <textarea id="promptInput" rows="2" placeholder="Type your question here..."></textarea>
             <button id="runBtn" class="ask-btn">➤ Ask Arena</button>
@@ -315,60 +278,56 @@
           <div class="input-hint">Press Enter to ask, Shift+Enter for a new line</div>
         </div>
 
-        <div class="results-grid">
-          <div class="result-card winner">
+        <div class="section-label">Individual Model Responses</div>
+        <div class="results-grid" id="resultsGrid">
+          <div class="result-card">
             <div class="card-top">
               <div class="card-model">
                 <div class="model-icon">A</div>
                 <div class="model-name-block">
                   <div class="label">Model A</div>
-                  <div class="name">Response A</div>
+                  <div class="name">OpenAI</div>
                 </div>
               </div>
-              <div class="score-badge">🏆 Winner</div>
             </div>
-            <div class="card-text">Sample response text goes here for model A...</div>
+            <div class="card-text">Ask a question to see this model's response.</div>
           </div>
-
           <div class="result-card">
             <div class="card-top">
               <div class="card-model">
                 <div class="model-icon">B</div>
                 <div class="model-name-block">
                   <div class="label">Model B</div>
-                  <div class="name">Response B</div>
+                  <div class="name">Google Gemini</div>
                 </div>
               </div>
             </div>
-            <div class="card-text">Sample response text goes here for model B...</div>
+            <div class="card-text">Ask a question to see this model's response.</div>
           </div>
-
           <div class="result-card">
             <div class="card-top">
               <div class="card-model">
                 <div class="model-icon">C</div>
                 <div class="model-name-block">
                   <div class="label">Model C</div>
-                  <div class="name">Response C</div>
+                  <div class="name">Meta Llama</div>
                 </div>
               </div>
             </div>
-            <div class="card-text">Sample response text goes here for model C...</div>
+            <div class="card-text">Ask a question to see this model's response.</div>
           </div>
         </div>
 
-        <div class="judge-box">
-          <div class="judge-top">
-            <div class="judge-title">
-              <div class="model-icon">⚖️</div>
-              <div>
-                <div class="name">Arena Judge</div>
-                <div class="sub" id="judgeStatus">Waiting for a question...</div>
-              </div>
-            </div>
-            <div class="winner-tag" id="winnerTag">⭐ Winner: —</div>
+        <div class="section-label">Final Synthesized Answer</div>
+        <div class="final-answer-box">
+          <div class="final-answer-top">
+            <div class="model-icon">✨</div>
+            <div class="title">Combined Best Answer</div>
           </div>
-          <div class="judge-reason" id="judgeReason">Ask a question above to see the judge's verdict here.</div>
+          <div class="final-answer-text" id="finalAnswerText">
+            Ask a question above. This answer is not copied from any single model — it's synthesized by analyzing all three responses and combining their strongest parts.
+          </div>
+          <div class="final-answer-reasoning" id="finalAnswerReasoning"></div>
           <div class="ratings-row">
             <div class="rating-item">Accuracy<div class="stars" id="starAccuracy">☆☆☆☆☆</div></div>
             <div class="rating-item">Clarity<div class="stars" id="starClarity">☆☆☆☆☆</div></div>
@@ -377,32 +336,12 @@
             <div class="rating-item">Completeness<div class="stars" id="starCompleteness">☆☆☆☆☆</div></div>
           </div>
         </div>
-
-        <div class="best-answer-wrap">
-          <div class="best-answer-bar">
-            <div class="best-answer-left">
-              <div class="model-icon">🏆</div>
-              <div>
-                <div class="title">Best Answer</div>
-                <div class="sub" id="bestAnswerSub">No answer yet</div>
-              </div>
-            </div>
-            <button class="show-btn" id="showAnswerBtn">👁 Show Answer</button>
-          </div>
-          <div class="best-answer-reveal" id="bestAnswerReveal"></div>
-        </div>
       </div>
 
       <!-- HISTORY PAGE -->
       <div id="page-history" class="page">
         <div class="page-title">History</div>
         <div class="empty-msg">No questions asked yet.</div>
-      </div>
-
-      <!-- LEADERBOARD PAGE -->
-      <div id="page-leaderboard" class="page">
-        <div class="page-title">Leaderboard</div>
-        <div class="empty-msg">No data yet.</div>
       </div>
 
       <!-- MODELS PAGE -->
@@ -415,37 +354,35 @@
                 <div class="model-icon">A</div>
                 <div class="model-name-block">
                   <div class="label">Model A</div>
-                  <div class="name">Contestant</div>
+                  <div class="name">OpenAI</div>
                 </div>
               </div>
             </div>
-            <div class="card-text">An AI model that answers every question and gets compared by the judge.</div>
+            <div class="card-text">gpt-oss-120b via OpenRouter (free tier).</div>
           </div>
-
           <div class="result-card">
             <div class="card-top">
               <div class="card-model">
                 <div class="model-icon">B</div>
                 <div class="model-name-block">
                   <div class="label">Model B</div>
-                  <div class="name">Contestant</div>
+                  <div class="name">Google Gemini</div>
                 </div>
               </div>
             </div>
-            <div class="card-text">An AI model that answers every question and gets compared by the judge.</div>
+            <div class="card-text">Gemini 2.5 Flash via Google AI Studio (free tier).</div>
           </div>
-
           <div class="result-card">
             <div class="card-top">
               <div class="card-model">
                 <div class="model-icon">C</div>
                 <div class="model-name-block">
                   <div class="label">Model C</div>
-                  <div class="name">Contestant</div>
+                  <div class="name">Meta Llama</div>
                 </div>
               </div>
             </div>
-            <div class="card-text">An AI model that answers every question and gets compared by the judge.</div>
+            <div class="card-text">Llama 3.3 70B via OpenRouter (free tier).</div>
           </div>
         </div>
       </div>
@@ -467,7 +404,7 @@
             </div>
           </div>
           <br>
-          <button id="clearHistoryBtn" class="show-btn">🗑 Clear All History</button>
+          <button id="clearHistoryBtn" class="ask-btn">🗑 Clear All History</button>
         </div>
       </div>
 
@@ -475,25 +412,16 @@
 
     <div class="stats-panel">
       <div class="stats-title">Arena Stats</div>
-
       <div class="stat-card">
         <div class="stat-icon">⚡</div>
         <div class="stat-value" id="statQuestions">0</div>
         <div class="stat-label">Questions Asked</div>
       </div>
-
-      <div class="stat-card">
-        <div class="stat-icon">🏆</div>
-        <div class="stat-value" id="statWins">0</div>
-        <div class="stat-label" id="statWinsLabel">Wins by Top Model</div>
-      </div>
-
       <div class="stat-card">
         <div class="stat-icon">📈</div>
-        <div class="stat-value" id="statWinRate">0%</div>
-        <div class="stat-label">Win Rate</div>
+        <div class="stat-value" id="statAvgRating">0</div>
+        <div class="stat-label">Avg. Answer Quality (/5)</div>
       </div>
-
       <div class="stat-card">
         <div class="stat-icon">🕐</div>
         <div class="stat-value" id="statAvgTime">0s</div>
@@ -504,10 +432,6 @@
 
   <script>
     // ---- History storage ----
-    function renderStars(count) {
-      const c = Math.max(0, Math.min(5, count));
-      return "★".repeat(c) + "☆".repeat(5 - c);
-    }
     function getHistory() {
       const stored = localStorage.getItem("arenaHistory");
       return stored ? JSON.parse(stored) : [];
@@ -532,71 +456,32 @@
       history.forEach((entry) => {
         html += `
           <div class="judge-box">
-            <div class="judge-top">
-              <div class="judge-title">
-                <div>
-                  <div class="name">${entry.prompt}</div>
-                  <div class="sub">${entry.time}</div>
-                </div>
+            <div class="judge-title">
+              <div>
+                <div class="name">${entry.prompt}</div>
+                <div class="sub">${entry.time}</div>
               </div>
-              <div class="winner-tag">⭐ Winner: Model ${entry.winner}</div>
             </div>
-            <div class="judge-reason">${entry.reason}</div>
+            <div class="judge-reason" style="margin-top:10px;">${entry.finalAnswer}</div>
           </div>
         `;
       });
-      container.innerHTML = html;
-    }
-
-    function renderLeaderboard() {
-      const history = getHistory();
-      const counts = { A: 0, B: 0, C: 0 };
-      history.forEach((entry) => {
-        if (counts[entry.winner] !== undefined) counts[entry.winner]++;
-      });
-
-      const total = history.length;
-      const container = document.getElementById("page-leaderboard");
-
-      if (total === 0) {
-        container.innerHTML = '<div class="page-title">Leaderboard</div><div class="empty-msg">No data yet.</div>';
-        return;
-      }
-
-      let html = '<div class="page-title">Leaderboard</div><div class="results-grid">';
-      ["A", "B", "C"].forEach((label) => {
-        const wins = counts[label];
-        const pct = total ? ((wins / total) * 100).toFixed(1) : 0;
-        html += `
-          <div class="result-card">
-            <div class="card-top">
-              <div class="card-model">
-                <div class="model-icon">${label}</div>
-                <div class="model-name-block">
-                  <div class="label">Model ${label}</div>
-                  <div class="name">${wins} wins</div>
-                </div>
-              </div>
-            </div>
-            <div class="card-text">Win rate: ${pct}%</div>
-          </div>
-        `;
-      });
-      html += "</div>";
       container.innerHTML = html;
     }
 
     function renderAnalytics() {
       const history = getHistory();
       const total = history.length;
-      const counts = { A: 0, B: 0, C: 0 };
+      let ratingSum = 0;
+      let timeSum = 0;
+
       history.forEach((entry) => {
-        if (counts[entry.winner] !== undefined) counts[entry.winner]++;
+        ratingSum += entry.avgRating || 0;
+        timeSum += entry.responseTime || 0;
       });
 
-      const topModel = Object.keys(counts).reduce((a, b) => (counts[a] >= counts[b] ? a : b), "A");
-      const topWins = counts[topModel];
-      const winRate = total ? ((topWins / total) * 100).toFixed(1) : 0;
+      const avgRating = total ? (ratingSum / total).toFixed(1) : 0;
+      const avgTime = total ? (timeSum / total).toFixed(1) : 0;
 
       const container = document.getElementById("page-analytics");
       container.innerHTML = `
@@ -608,44 +493,44 @@
             <div class="stat-label">Questions Asked</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">🏆</div>
-            <div class="stat-value">${topWins}</div>
-            <div class="stat-label">Wins by Model ${topModel}</div>
+            <div class="stat-icon">📈</div>
+            <div class="stat-value">${avgRating}</div>
+            <div class="stat-label">Avg. Answer Quality (/5)</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">📈</div>
-            <div class="stat-value">${winRate}%</div>
-            <div class="stat-label">Top Model Win Rate</div>
+            <div class="stat-icon">🕐</div>
+            <div class="stat-value">${avgTime}s</div>
+            <div class="stat-label">Avg. Response Time</div>
           </div>
         </div>
       `;
     }
 
-    // ---- Real Arena Stats panel (right side, always visible) ----
     function updateStatsPanel() {
       const history = getHistory();
       const total = history.length;
-      const counts = { A: 0, B: 0, C: 0 };
+      let ratingSum = 0;
       let timeSum = 0;
 
       history.forEach((entry) => {
-        if (counts[entry.winner] !== undefined) counts[entry.winner]++;
+        ratingSum += entry.avgRating || 0;
         timeSum += entry.responseTime || 0;
       });
 
-      const topModel = Object.keys(counts).reduce((a, b) => (counts[a] >= counts[b] ? a : b), "A");
-      const topWins = counts[topModel];
-      const winRate = total ? ((topWins / total) * 100).toFixed(1) : 0;
+      const avgRating = total ? (ratingSum / total).toFixed(1) : 0;
       const avgTime = total ? (timeSum / total).toFixed(1) : 0;
 
       document.getElementById("statQuestions").textContent = total;
-      document.getElementById("statWins").textContent = topWins;
-      document.getElementById("statWinsLabel").textContent = "Wins by Model " + topModel;
-      document.getElementById("statWinRate").textContent = winRate + "%";
+      document.getElementById("statAvgRating").textContent = avgRating;
       document.getElementById("statAvgTime").textContent = avgTime + "s";
     }
 
-    // ---- Sliding sidebar (push mode on desktop, overlay on mobile) ----
+    function renderStars(count) {
+      const c = Math.max(0, Math.min(5, Math.round(count)));
+      return "★".repeat(c) + "☆".repeat(5 - c);
+    }
+
+    // ---- Sliding sidebar ----
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("overlay");
     const menuToggle = document.getElementById("menuToggle");
@@ -658,7 +543,6 @@
       document.body.classList.add("menu-open");
       menuToggle.textContent = "✕";
     }
-
     function closeSidebar() {
       sidebar.classList.remove("open");
       overlay.classList.remove("show");
@@ -666,42 +550,29 @@
       document.body.classList.remove("menu-open");
       menuToggle.textContent = "☰";
     }
-
     menuToggle.addEventListener("click", () => {
       if (sidebar.classList.contains("open")) closeSidebar();
       else openSidebar();
     });
-
     overlay.addEventListener("click", closeSidebar);
     sidebarClose.addEventListener("click", closeSidebar);
 
-    // ---- Sidebar page switching ----
     const navItems = document.querySelectorAll(".nav-item");
     const pages = document.querySelectorAll(".page");
-
     navItems.forEach((item) => {
       item.addEventListener("click", () => {
         navItems.forEach((n) => n.classList.remove("active"));
         pages.forEach((p) => p.classList.remove("active"));
-
         item.classList.add("active");
-        const pageId = "page-" + item.dataset.page;
-        document.getElementById(pageId).classList.add("active");
-
-        // Chhoti screen (mobile) pe hi close karo, badi screen pe khula rehne do
-        if (window.innerWidth < 700) {
-          closeSidebar();
-        }
+        document.getElementById("page-" + item.dataset.page).classList.add("active");
+        if (window.innerWidth < 700) closeSidebar();
       });
     });
 
     // ---- Arena functionality ----
     const runBtn = document.getElementById("runBtn");
     const promptInput = document.getElementById("promptInput");
-    const showAnswerBtn = document.getElementById("showAnswerBtn");
-    const bestAnswerReveal = document.getElementById("bestAnswerReveal");
-
-    let latestWinnerText = "";
+    const resultsGrid = document.getElementById("resultsGrid");
 
     async function runArena() {
       const userText = promptInput.value;
@@ -709,9 +580,8 @@
 
       runBtn.textContent = "Thinking...";
       runBtn.disabled = true;
-      document.getElementById("judgeStatus").textContent = "Evaluating responses...";
-      bestAnswerReveal.classList.remove("show");
-      showAnswerBtn.textContent = "👁 Show Answer";
+      document.getElementById("finalAnswerText").textContent = "Analyzing all three responses and synthesizing the best answer...";
+      document.getElementById("finalAnswerReasoning").textContent = "";
 
       const startTime = performance.now();
 
@@ -723,49 +593,35 @@
         });
 
         const data = await res.json();
-        const responseTime = ((performance.now() - startTime) / 1000);
+        const responseTime = (performance.now() - startTime) / 1000;
 
-        const cards = document.querySelectorAll(".result-card");
+        const cards = resultsGrid.querySelectorAll(".result-card");
         data.results.forEach((r, i) => {
           const card = cards[i];
-          const isWinner = r.label === data.verdict.winner;
-
-          card.classList.toggle("winner", isWinner);
+          card.querySelector(".name").textContent = r.name;
           card.querySelector(".card-text").textContent = r.output;
-
-          let badge = card.querySelector(".score-badge");
-          if (isWinner && !badge) {
-            badge = document.createElement("div");
-            badge.className = "score-badge";
-            badge.textContent = "🏆 Winner";
-            card.querySelector(".card-top").appendChild(badge);
-          } else if (!isWinner && badge) {
-            badge.remove();
-          }
-
-          if (isWinner) latestWinnerText = r.output;
         });
 
-        document.getElementById("judgeStatus").textContent = "Evaluation complete";
-        document.getElementById("judgeReason").textContent = data.verdict.reason;
-        const ratings = data.verdict.ratings || {};
+        document.getElementById("finalAnswerText").textContent = data.evaluation.finalAnswer;
+        document.getElementById("finalAnswerReasoning").textContent = "How it was combined: " + data.evaluation.reasoning;
+
+        const ratings = data.evaluation.ratings || {};
         document.getElementById("starAccuracy").textContent = renderStars(ratings.accuracy || 0);
         document.getElementById("starClarity").textContent = renderStars(ratings.clarity || 0);
         document.getElementById("starDepth").textContent = renderStars(ratings.depth || 0);
         document.getElementById("starRelevance").textContent = renderStars(ratings.relevance || 0);
         document.getElementById("starCompleteness").textContent = renderStars(ratings.completeness || 0);
-        document.getElementById("winnerTag").textContent = "⭐ Winner: Model " + data.verdict.winner;
-        document.getElementById("bestAnswerSub").textContent = "From Model " + data.verdict.winner;
+
+        const avgRating = ((ratings.accuracy || 0) + (ratings.clarity || 0) + (ratings.depth || 0) + (ratings.relevance || 0) + (ratings.completeness || 0)) / 5;
 
         saveToHistory({
           prompt: userText,
-          winner: data.verdict.winner,
-          reason: data.verdict.reason,
+          finalAnswer: data.evaluation.finalAnswer,
           time: new Date().toLocaleString(),
           responseTime: responseTime,
+          avgRating: avgRating,
         });
         renderHistory();
-        renderLeaderboard();
         renderAnalytics();
         updateStatsPanel();
       } catch (err) {
@@ -777,7 +633,6 @@
     }
 
     runBtn.addEventListener("click", runArena);
-
     promptInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -785,28 +640,16 @@
       }
     });
 
-    // ---- Show Answer button ----
-    showAnswerBtn.addEventListener("click", () => {
-      if (!latestWinnerText) return;
-      const isShown = bestAnswerReveal.classList.toggle("show");
-      bestAnswerReveal.textContent = latestWinnerText;
-      showAnswerBtn.textContent = isShown ? "🙈 Hide Answer" : "👁 Show Answer";
-    });
-
-    // ---- Settings: clear history ----
     document.getElementById("clearHistoryBtn").addEventListener("click", () => {
       if (confirm("Are you sure you want to delete all history?")) {
         localStorage.removeItem("arenaHistory");
         renderHistory();
-        renderLeaderboard();
         renderAnalytics();
         updateStatsPanel();
       }
     });
 
-    // ---- Initial render on page load ----
     renderHistory();
-    renderLeaderboard();
     renderAnalytics();
     updateStatsPanel();
   </script>
