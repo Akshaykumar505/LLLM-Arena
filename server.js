@@ -5,10 +5,46 @@ const app = express();
 app.use(express.static("public"));
 app.use(express.json());
 
+// Render jaisi hosting ke peeche real IP address pane ke liye
+app.set("trust proxy", 1);
+
+// ---- Simple in-memory daily rate limiter ----
+const DAILY_LIMIT = 5;
+const usageStore = {}; // { "ip-address": { count: 2, date: "2026-07-14" } }
+
+function getTodayDate() {
+  return new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+}
+
+function getUsage(ip) {
+  const today = getTodayDate();
+  if (!usageStore[ip] || usageStore[ip].date !== today) {
+    usageStore[ip] = { count: 0, date: today };
+  }
+  return usageStore[ip];
+}
+
+function checkUsage(ip) {
+  const usage = getUsage(ip);
+  return { allowed: usage.count < DAILY_LIMIT, used: usage.count, limit: DAILY_LIMIT };
+}
+
+function incrementUsage(ip) {
+  const usage = getUsage(ip);
+  usage.count++;
+  return usage.count;
+}
+
+// Frontend ye endpoint use karega "X/5 used" dikhane ke liye, bina koi request kharch kiye
+app.get("/api/usage", (req, res) => {
+  const usage = getUsage(req.ip);
+  res.json({ used: usage.count, limit: DAILY_LIMIT, remaining: DAILY_LIMIT - usage.count });
+});
+
 // Teen contestant models — 2 genuine providers (OpenAI, Google Gemini)
 // + ek third free model (Claude ka koi free tier nahi hai kahi bhi)
 const MODELS = [
-  { label: "A", provider: "openrouter", model: "openai/gpt-oss-120b:free", name: "OpenAI (gpt-oss-120b)" },
+  { label: "A", provider: "openrouter", model: "openai/gpt-oss-20b:free", name: "OpenAI (gpt-oss-20b)" },
   { label: "B", provider: "gemini", model: "gemini-3.1-flash-lite", name: "Google Gemini Flash-Lite" },
   { label: "C", provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct:free", name: "Meta Llama 3.3 70B" },
 ];
@@ -46,7 +82,9 @@ async function callGemini(model, prompt, maxTokens = 200) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: maxTokens },
+      generationConfig: {
+        maxOutputTokens: maxTokens,
+      },
     }),
   });
   const data = await response.json();
@@ -107,6 +145,15 @@ Reply with ONLY this JSON format, nothing else:
 }
 
 app.post("/api/test", async (req, res) => {
+  const usageCheck = checkUsage(req.ip);
+  if (!usageCheck.allowed) {
+    return res.status(429).json({
+      error: "Daily limit reached. You can ask up to 5 questions per day. Please try again tomorrow.",
+      used: usageCheck.used,
+      limit: usageCheck.limit,
+    });
+  }
+
   const userPrompt = req.body.prompt;
 
   const concisePrompt = `${userPrompt}\n\n(Please answer concisely and directly, in 3-5 sentences maximum.)`;
@@ -122,6 +169,12 @@ app.post("/api/test", async (req, res) => {
   });
 
   const evaluation = await synthesizeFinalAnswer(userPrompt, outputsObj);
+
+  // Sirf tabhi count badhao jab evaluator ne genuinely ek naya synthesized answer diya ho
+  const isGenuineSuccess = !evaluation.reasoning.startsWith("Could not parse");
+  if (isGenuineSuccess) {
+    incrementUsage(req.ip);
+  }
 
   const results = MODELS.map((m) => ({
     label: m.label,

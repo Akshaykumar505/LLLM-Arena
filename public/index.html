@@ -275,7 +275,7 @@
             <textarea id="promptInput" rows="2" placeholder="Type your question here..."></textarea>
             <button id="runBtn" class="ask-btn">➤ Ask Arena</button>
           </div>
-          <div class="input-hint">Press Enter to ask, Shift+Enter for a new line</div>
+          <div class="input-hint">Press Enter to ask, Shift+Enter for a new line · 5 questions per day</div>
         </div>
 
         <div class="section-label">Individual Model Responses</div>
@@ -370,7 +370,7 @@
                 </div>
               </div>
             </div>
-            <div class="card-text">Gemini 2.5 Flash via Google AI Studio (free tier).</div>
+            <div class="card-text">Gemini Flash-Lite via Google AI Studio (free tier).</div>
           </div>
           <div class="result-card">
             <div class="card-top">
@@ -413,9 +413,14 @@
     <div class="stats-panel">
       <div class="stats-title">Arena Stats</div>
       <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value" id="usageDisplay">—/5</div>
+        <div class="stat-label">Questions Used Today</div>
+      </div>
+      <div class="stat-card">
         <div class="stat-icon">⚡</div>
         <div class="stat-value" id="statQuestions">0</div>
-        <div class="stat-label">Questions Asked</div>
+        <div class="stat-label">Questions Asked (Total)</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">📈</div>
@@ -431,6 +436,17 @@
   </div>
 
   <script>
+    // ---- Usage limit display ----
+    async function updateUsageDisplay() {
+      try {
+        const res = await fetch("/api/usage");
+        const data = await res.json();
+        document.getElementById("usageDisplay").textContent = data.used + "/" + data.limit;
+      } catch (err) {
+        console.log("Could not fetch usage:", err);
+      }
+    }
+
     // ---- History storage ----
     function getHistory() {
       const stored = localStorage.getItem("arenaHistory");
@@ -593,6 +609,16 @@
         });
 
         const data = await res.json();
+
+        if (res.status === 429) {
+          alert(data.error);
+          document.getElementById("finalAnswerText").textContent = "Ask a question above to see the synthesized answer here.";
+          runBtn.textContent = "➤ Ask Arena";
+          runBtn.disabled = false;
+          updateUsageDisplay();
+          return;
+        }
+
         const responseTime = (performance.now() - startTime) / 1000;
 
         const cards = resultsGrid.querySelectorAll(".result-card");
@@ -624,6 +650,7 @@
         renderHistory();
         renderAnalytics();
         updateStatsPanel();
+        updateUsageDisplay();
       } catch (err) {
         alert("Error: " + err.message);
       }
@@ -652,6 +679,7 @@
     renderHistory();
     renderAnalytics();
     updateStatsPanel();
+    updateUsageDisplay();
   </script>
 </body>
 </html>
