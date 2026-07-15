@@ -1,5 +1,10 @@
 require("dotenv").config();
 const express = require("express");
+const mongoose = require("mongoose");
+const session = require("express-session");
+const bcrypt = require("bcryptjs");
+const User = require("./models/User");
+
 const app = express();
 
 app.use(express.static("public"));
@@ -8,48 +13,130 @@ app.use(express.json());
 // Render jaisi hosting ke peeche real IP address pane ke liye
 app.set("trust proxy", 1);
 
-// ---- Simple in-memory daily rate limiter ----
+// ---- Database connect karna ----
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB connected successfully"))
+  .catch((err) => console.log("MongoDB connection error:", err));
+
+// ---- Session setup (login yaad rakhne ke liye) ----
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }, // 7 din tak login yaad rahega
+}));
+
+// ---- Simple in-memory daily rate limiter (ab username-based) ----
 const DAILY_LIMIT = 5;
-const usageStore = {}; // { "ip-address": { count: 2, date: "2026-07-14" } }
+const usageStore = {}; // { "username": { count: 2, date: "2026-07-14" } }
 
 function getTodayDate() {
-  return new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+  return new Date().toISOString().split("T")[0];
 }
 
-function getUsage(ip) {
+function getUsage(username) {
   const today = getTodayDate();
-  if (!usageStore[ip] || usageStore[ip].date !== today) {
-    usageStore[ip] = { count: 0, date: today };
+  if (!usageStore[username] || usageStore[username].date !== today) {
+    usageStore[username] = { count: 0, date: today };
   }
-  return usageStore[ip];
+  return usageStore[username];
 }
 
-function checkUsage(ip) {
-  const usage = getUsage(ip);
+function checkUsage(username) {
+  const usage = getUsage(username);
   return { allowed: usage.count < DAILY_LIMIT, used: usage.count, limit: DAILY_LIMIT };
 }
 
-function incrementUsage(ip) {
-  const usage = getUsage(ip);
+function incrementUsage(username) {
+  const usage = getUsage(username);
   usage.count++;
   return usage.count;
 }
 
-// Frontend ye endpoint use karega "X/5 used" dikhane ke liye, bina koi request kharch kiye
-app.get("/api/usage", (req, res) => {
-  const usage = getUsage(req.ip);
-  res.json({ used: usage.count, limit: DAILY_LIMIT, remaining: DAILY_LIMIT - usage.count });
+// ---- Auth routes ----
+app.post("/api/signup", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password are required." });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters." });
+    }
+
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: "Username already taken." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, password: hashedPassword });
+    await newUser.save();
+
+    req.session.userId = newUser._id;
+    req.session.username = newUser.username;
+
+    res.json({ success: true, username: newUser.username });
+  } catch (err) {
+    console.log("Signup error:", err);
+    res.status(500).json({ error: "Something went wrong during signup." });
+  }
 });
 
-// Teen contestant models — 2 genuine providers (OpenAI, Google Gemini)
-// + ek third free model (Claude ka koi free tier nahi hai kahi bhi)
+app.post("/api/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ error: "Invalid username or password." });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Invalid username or password." });
+    }
+
+    req.session.userId = user._id;
+    req.session.username = user.username;
+
+    res.json({ success: true, username: user.username });
+  } catch (err) {
+    console.log("Login error:", err);
+    res.status(500).json({ error: "Something went wrong during login." });
+  }
+});
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.json({ success: true });
+  });
+});
+
+app.get("/api/me", (req, res) => {
+  if (req.session.userId) {
+    res.json({ loggedIn: true, username: req.session.username });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
+app.get("/api/usage", (req, res) => {
+  if (!req.session.userId) {
+    return res.json({ loggedIn: false });
+  }
+  const usage = getUsage(req.session.username);
+  res.json({ loggedIn: true, used: usage.count, limit: DAILY_LIMIT, remaining: DAILY_LIMIT - usage.count });
+});
+
+// ---- AI Models ----
 const MODELS = [
   { label: "A", provider: "openrouter", model: "openai/gpt-oss-20b:free", name: "OpenAI (gpt-oss-20b)" },
   { label: "B", provider: "gemini", model: "gemini-3.1-flash-lite", name: "Google Gemini Flash-Lite" },
   { label: "C", provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct:free", name: "Meta Llama 3.3 70B" },
 ];
 
-// ---- OpenRouter caller ----
 async function callOpenRouter(model, prompt, maxTokens = 200) {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -73,7 +160,6 @@ async function callOpenRouter(model, prompt, maxTokens = 200) {
   return data.choices[0].message.content;
 }
 
-// ---- Google Gemini caller (direct API, not via OpenRouter) ----
 async function callGemini(model, prompt, maxTokens = 200) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
@@ -98,7 +184,6 @@ async function callGemini(model, prompt, maxTokens = 200) {
   return text;
 }
 
-// ---- Router: calls the right provider based on model entry ----
 async function callModel(entry, prompt, maxTokens = 200) {
   if (entry.provider === "gemini") {
     return callGemini(entry.model, prompt, maxTokens);
@@ -106,7 +191,6 @@ async function callModel(entry, prompt, maxTokens = 200) {
   return callOpenRouter(entry.model, prompt, maxTokens);
 }
 
-// ---- Evaluator: analyzes all 3 responses and SYNTHESIZES a new final answer ----
 async function synthesizeFinalAnswer(prompt, outputs) {
   const evaluatorPrompt = `You are an expert evaluator. A user asked a question, and three independent AI models each gave their own answer below. Your job is NOT to simply pick one of them. Instead:
 1. Analyze all three responses.
@@ -145,7 +229,11 @@ Reply with ONLY this JSON format, nothing else:
 }
 
 app.post("/api/test", async (req, res) => {
-  const usageCheck = checkUsage(req.ip);
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Please log in to ask a question." });
+  }
+
+  const usageCheck = checkUsage(req.session.username);
   if (!usageCheck.allowed) {
     return res.status(429).json({
       error: "Daily limit reached. You can ask up to 5 questions per day. Please try again tomorrow.",
@@ -170,10 +258,9 @@ app.post("/api/test", async (req, res) => {
 
   const evaluation = await synthesizeFinalAnswer(userPrompt, outputsObj);
 
-  // Sirf tabhi count badhao jab evaluator ne genuinely ek naya synthesized answer diya ho
   const isGenuineSuccess = !evaluation.reasoning.startsWith("Could not parse");
   if (isGenuineSuccess) {
-    incrementUsage(req.ip);
+    incrementUsage(req.session.username);
   }
 
   const results = MODELS.map((m) => ({
