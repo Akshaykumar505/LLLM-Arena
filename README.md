@@ -1,113 +1,100 @@
 🏆 LLM Arena
 
-Ask one question, get answers from 3 AI models at once, and let a 4th AI "judge" model pick the best response.
+A full-stack GenAI application that demonstrates the self-consistency technique: a user's question is sent to 3 independent AI models in parallel, and a 4th evaluator model analyzes all three responses to produce one refined, synthesized final answer — rather than simply picking a winner.
 
-Live demo: https://lllm-arena.onrender.com
+Live demo: https://lllm-arena.onrender.com/
+
+How It Works
+
+
+User signs up / logs in
+User submits a question
+The same prompt is sent in parallel to three models: OpenAI, Google Gemini, and Meta Llama
+All three responses are collected (with graceful error handling if any model fails)
+The responses are passed to an evaluator model, which combines their strongest parts into a new synthesized answer — response order is randomized before evaluation to avoid position bias
+The final answer, individual model responses, and quality ratings are shown to the user
+
 
 Features
 
 
-3 AI models compete on every question, answering in parallel
-AI judge evaluates all three responses and picks a winner (with bias mitigation — response order is shuffled before judging to avoid favoring the first answer)
-Star ratings across 5 criteria (accuracy, clarity, depth, relevance, completeness)
-History — every question and its winner is saved locally in the browser
-Leaderboard — tracks win count and win rate per model
-Analytics — aggregate stats across all questions asked
-Responsive UI — sliding sidebar menu, works on desktop and mobile
-Enter to submit — no need to click the button
+Multi-model orchestration — 3 AI models called in parallel via Promise.allSettled
+Answer synthesis, not selection — the evaluator writes a new combined answer instead of copying one model's response
+Bias mitigation — response order shown to the evaluator is shuffled each time
+Authentication — signup/login with bcrypt-hashed passwords, session-based auth, MongoDB-backed persistent accounts
+Daily rate limiting — 5 questions per user per day, with a live "X/5 used" counter; only successful responses count against the quota
+Responsive UI — sliding sidebar navigation (push on desktop, overlay on mobile), History, Analytics, and Models pages
+Loading and error states throughout
 
 
 Tech Stack
 
 
-Backend: Node.js + Express
-AI Models: OpenRouter (free-tier models)
+Backend: Node.js, Express
 Frontend: Vanilla HTML/CSS/JavaScript (no framework, no build step)
-Storage: Browser localStorage for history/stats (no database needed)
+AI Models: OpenAI & Meta Llama via OpenRouter (free tier), Google Gemini via Google AI Studio (free tier)
+Database: MongoDB Atlas (user accounts)
+Auth: express-session, bcryptjs
+Deployment: Render (auto-deploys from GitHub on push)
 
 
 Project Structure
 
 llm-arena/
-├── server.js          # Express backend — calls the 3 models + judge
+├── server.js            # Express backend — models, evaluator, auth, rate limiting
+├── models/
+│   └── User.js           # Mongoose schema for user accounts
 ├── public/
-│   └── index.html      # Frontend UI (single file, inline CSS/JS)
+│   └── index.html         # Frontend UI (single file, inline CSS/JS)
 ├── package.json
-├── .env.example         # Template for your API key
+├── .env.example
 ├── .gitignore
 └── README.md
 
 Setup (Local Development)
 
-1. Clone the repository
+1. Clone and install
 
-bashgit clone https://github.com/Akshaykumar505/LLLM-Arena
-cd llm-arena
+bashgit clone https://github.com/Akshaykumar505/LLLM-Arena.git
+cd LLLM-Arena
+npm install
 
-2. Install dependencies
-
-bashnpm install
-
-3. Get a free OpenRouter API key
+2. Get API keys
 
 
-Sign up at openrouter.ai
-Go to openrouter.ai/keys and create a new key
+OpenRouter: sign up at openrouter.ai → openrouter.ai/keys
+Gemini: get a free key at aistudio.google.com
+MongoDB: create a free M0 cluster at MongoDB Atlas, get your connection string, and allow access from anywhere (0.0.0.0/0) under Network Access
 
 
-4. Set up environment variables
+3. Configure environment variables
 
 bashcp .env.example .env
 
-Open .env and add your key:
+Fill in .env:
 
-OPENROUTER_API_KEY=sk-or-v1-your-key-here
+OPENROUTER_API_KEY=your_openrouter_key
+GEMINI_API_KEY=your_gemini_key
+MONGODB_URI=your_mongodb_connection_string
+SESSION_SECRET=any_random_string
 
-5. Run the server
+4. Run
 
 bashnpm start
 
-Open http://localhost:3000 in your browser.
+Open http://localhost:3000, sign up, and start asking questions.
 
-Configuring Models
+API Endpoints
 
-The three contestant models are set in server.js:
-
-javascriptconst MODELS = [
-  { label: "A", model: "openrouter/free" },
-  { label: "B", model: "openrouter/free" },
-  { label: "C", model: "openrouter/free" },
-];
-
-Swap "openrouter/free" for any specific free model from openrouter.ai/models?max_price=0 to compare specific models instead of the auto-router.
+MethodEndpointPurposePOST/api/signupCreate a new accountPOST/api/loginLog inPOST/api/logoutEnd sessionGET/api/meCheck login statusGET/api/usageGet today's usage countPOST/api/testRun the full multi-model + synthesis pipeline
 
 Deployment
 
-This project is deployed on Render:
+Deployed on Render as a Node.js web service, connected to this GitHub repo. Every push to main triggers an automatic rebuild and redeploy. All secrets (API keys, DB connection string, session secret) are set as environment variables in Render — never committed to source control.
+
+Known Limitations
 
 
-Push your code to GitHub (make sure .env is in .gitignore — never commit API keys)
-Create a new Web Service on Render, connect your GitHub repo
-Set:
-
-Build Command: npm install
-Start Command: node server.js
-
-
-
-Add an environment variable: OPENROUTER_API_KEY = your key
-Deploy — Render gives you a live URL
-
-
-Any future git push to main automatically triggers a redeploy.
-
-Notes on Free Tier Usage
-
-
-OpenRouter's free models have rate limits — if a model fails, it's usually temporary (wait a bit and retry)
-Render's free web service tier sleeps after 15 minutes of inactivity; the first request after that takes 30–60 seconds to wake up (cold start)
-
-
-License
-
-Free to use and modify for personal/educational purposes.
+Free-tier AI models occasionally hit rate limits; failures are handled gracefully without crashing the request
+The evaluator uses Google Gemini (no free tier exists for Claude at the time of writing)
+Render's free tier sleeps after inactivity, causing a slower first response (cold start)
